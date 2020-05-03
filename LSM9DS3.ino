@@ -7,12 +7,18 @@ const int halfFilled = 605;
 const int threeQuarterFilled = 625;
 const int filled = 635;
 
+const float standingTolerance = 0.05;
+
 const int sensorPin = A0;
 const int redPin = 22;
 const int greenPin = 23;
 const int bluePin = 24;
 
-int sensorValue = 0;
+const int samples = 10;
+int sensorValues[samples] = {0};
+int sampleIndex = 0;
+int sensorValueTotal = 0;
+int sensorValueAverage = 0;
 
 
 void setup() {
@@ -39,28 +45,41 @@ void loop() {
 
     IMU.readAcceleration(x, y, z);
 
-    if (x <= -0.95 && x >= -1.05) {
+    if (x <= (-1 + standingTolerance) && x >= (-1 - standingTolerance)) {
       Serial.print("standing: ");
-      sensorValue = analogRead(sensorPin);
-
-      if (sensorValue > filled) {
+        
+      // remove oldest value from total
+      sensorValueTotal -= sensorValues[sampleIndex];
+      
+      sensorValues[sampleIndex] = analogRead(sensorPin);
+      sensorValueTotal += sensorValues[sampleIndex];
+      sensorValueAverage = sensorValueTotal / samples;
+      
+      if (sensorValueAverage > filled) {
         Serial.print("100% ");
         setLed(255, 0, 0);
-      } else if (sensorValue > threeQuarterFilled) {
+      } else if (sensorValueAverage > threeQuarterFilled) {
         Serial.print("75% ");
         setLed(255, 127, 0);
-      } else if (sensorValue > halfFilled) {
+      } else if (sensorValueAverage > halfFilled) {
         Serial.print("50% ");
         setLed(255, 255, 0);
-      } else if (sensorValue > quarterFilled) {
+      } else if (sensorValueAverage > quarterFilled) {
         Serial.print("25% ");
         setLed(0, 255, 0);
       } else {
         Serial.print("0% ");
         setLed(0, 0, 255);
       }
-      
-      Serial.println(sensorValue);
+
+      // wrap index if needed
+      sampleIndex++;
+      if (sampleIndex == samples)
+      {
+        sampleIndex = 0;
+      }
+  
+      Serial.println(sensorValueAverage);
     } else {
       Serial.println("not standing");
         setLed(255, 0, 255);

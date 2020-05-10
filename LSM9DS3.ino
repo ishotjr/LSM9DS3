@@ -2,10 +2,10 @@
 
 // calibration
 const int empty = 0;
-const int quarterFilled = 455;
-const int halfFilled = 605;
-const int threeQuarterFilled = 625;
-const int filled = 635;
+const int quarterFilled = 350;
+const int halfFilled = 400;
+const int threeQuarterFilled = 420;
+const int filled = 430;
 
 const float standingTolerance = 0.05;
 
